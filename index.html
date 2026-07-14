@@ -187,17 +187,22 @@
   .fish-note{text-align:center;margin-top:2em;font-size:.82rem;color:var(--ink-soft)}
 
   /* ---------- quality / commitment ---------- */
+  /* sticky を効かせるため overflow:clip（スクロールコンテナを作らない） */
   .quality{
-    color:var(--paper);position:relative;overflow:hidden;
+    color:var(--paper);position:relative;overflow:clip;
   }
-  /* 背景画像（JSで画面に固定して見えるよう制御。iOS Safariは
-     background-attachment:fixed を無視するため、この方式で統一） */
+  /* 背景画像（CSS position:sticky で画面の上端に固定して見せる。
+     コンポジタ任せなので滑らか。iOS Safari は background-attachment:fixed を
+     無視するため sticky で全端末同じ挙動にする）。.quality の最初の子要素（flow内）。*/
   .quality-bg{
-    position:absolute;left:0;right:0;top:0;height:100vh;z-index:0;
+    position:sticky;top:0;height:100vh;z-index:0;
+    /* section 由来の左右 padding(24px) と .quality の上下 padding を負マージンで打ち消し、
+       背景をセクション全面へ広げる。上は margin-top で上端まで、左右は -24px で全幅に。
+       margin-bottom で flow から抜き、後続の .wrap を本来の padding 位置から開始させる。*/
+    margin:calc(-1 * clamp(90px,13vw,170px)) -24px calc(clamp(90px,13vw,170px) - 100vh);
     background-image:url('quality-bg.jpg');
     background-size:cover;
     background-position:72% 28%;   /* 金魚が写っている右上寄りを見せる */
-    will-change:transform;
   }
   /* 文字を読ませるための暗幕（深緑を乗せてトーンを揃える） */
   .quality::before{
@@ -368,7 +373,6 @@
     .reveal{opacity:1;transform:none}
     .fish-grid .fish-card{opacity:1;transform:none}
     .hero-bg img{animation:none!important}
-    .quality-bg{transform:none!important}
   }
 
   /* ===== 言語切替（他のCSSに負けないよう最後に高い優先度で定義） ===== */
@@ -695,27 +699,6 @@
     es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');gridIO.unobserve(e.target)}})
   },{threshold:.15});
   document.querySelectorAll('.fish-grid').forEach(el=>gridIO.observe(el));
-
-  // こだわりセクションの背景を「画面に固定」して見せる
-  // （iOS Safari は background-attachment:fixed を無視するため、JSで全端末同じ挙動にする）
-  const qSec=document.querySelector('.quality');
-  const qBg=document.querySelector('.quality-bg');
-  const reduceMotion=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-  let qTicking=false;
-  function qParallax(){
-    qTicking=false;
-    if(!qSec||!qBg)return;
-    if(reduceMotion){qBg.style.transform='none';return}
-    const r=qSec.getBoundingClientRect();
-    if(r.bottom<-100||r.top>window.innerHeight+100)return;
-    // セクションの上端ぶんだけ逆に動かす＝背景は常に画面の上端に居座る（＝固定に見える）
-    qBg.style.transform='translate3d(0,'+(-r.top).toFixed(1)+'px,0)';
-  }
-  window.addEventListener('scroll',()=>{
-    if(!qTicking){requestAnimationFrame(qParallax);qTicking=true}
-  },{passive:true});
-  window.addEventListener('resize',qParallax,{passive:true});
-  qParallax();
 
   // 数字カウントアップ
   const countIO=new IntersectionObserver((es)=>{
