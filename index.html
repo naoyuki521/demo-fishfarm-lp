@@ -114,10 +114,12 @@
     min-height:100svh;display:flex;align-items:flex-end;position:relative;
     color:var(--paper);padding:0 24px clamp(56px,9vw,104px);overflow:hidden;
   }
-  /* ヒーロー背景を viewport に固定（パララックス）。前面の内容だけがスクロールする。
-     ※ iOS Safari は background-attachment:fixed を無視し通常スクロールに退行する */
-  .hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden;
-    background:url('hero-fishfarm.jpg') center 62%/cover fixed}
+  /* ヒーロー背景パララックス：JS が --py を更新し ::before を transform で動かす
+     （background-attachment:fixed は iOS で無効＆描画不具合があるため transform 方式）*/
+  .hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden}
+  .hero-bg::before{content:"";position:absolute;left:0;right:0;top:0;height:100vh;
+    background:url('hero-fishfarm.jpg') center 62%/cover;
+    transform:translate3d(0,var(--py,0px),0);will-change:transform}
   .hero-bg .ph{width:100%;height:100%}
   .hero-bg::after{content:"";position:absolute;inset:0;
     background:linear-gradient(180deg,rgba(20,34,26,.55) 0%,rgba(20,34,26,.28) 30%,rgba(20,34,26,.5) 64%,rgba(20,34,26,.82) 100%)}
@@ -197,14 +199,14 @@
   .quality{
     color:var(--paper);position:relative;overflow:hidden;
   }
-  /* 背景画像を viewport に固定（パララックス）。前面の .wrap だけがスクロールする。
-     ※ iOS Safari は background-attachment:fixed を無視し通常スクロールに退行する */
+  /* 背景パララックス：JS が --py を更新し、この層を transform で viewport に固定して見せる。
+     focal は右上の2匹の金魚（多少見切れても可）。iOS でも効くよう transform 方式。*/
   .quality-bg{
-    position:absolute;inset:0;z-index:0;
+    position:absolute;left:0;right:0;top:0;height:100vh;z-index:0;
     background-image:url('quality-bg.jpg');
     background-size:cover;
-    background-position:72% 28%;   /* 金魚が写っている右上寄りを見せる */
-    background-attachment:fixed;
+    background-position:80% 26%;   /* 右上の2匹の金魚を見せる */
+    transform:translate3d(0,var(--py,0px),0);will-change:transform;
   }
   /* 文字を読ませるための暗幕（深緑を乗せてトーンを揃える） */
   .quality::before{
@@ -235,11 +237,13 @@
 
   /* ---------- overseas ---------- */
   .overseas{background:linear-gradient(160deg,var(--sumi),var(--moss-deep));color:var(--paper);position:relative;overflow:hidden}
-  /* 金魚シルエットを viewport に固定（パララックス）。※iOS Safari は退行 */
-  .overseas .kanji{position:absolute;inset:0;z-index:0;opacity:.09;pointer-events:none;
+  /* 金魚シルエットのパララックス：右側に固定して見せる（多少見切れても可）。
+     JS が --py を更新、iOS でも効くよう transform 方式。*/
+  .overseas .kanji{position:absolute;left:0;right:0;top:0;height:100vh;z-index:0;
+    opacity:.09;pointer-events:none;
     background:url('fish-silhouette.png') no-repeat right center;
     background-size:clamp(320px,42vw,640px) auto;
-    background-attachment:fixed}
+    transform:translate3d(0,var(--py,0px),0);will-change:transform}
   .overseas .wrap{position:relative;z-index:2;max-width:820px}
   .overseas .eyebrow{color:var(--gold-soft)}.overseas .eyebrow::before{background:var(--gold-soft)}
   .overseas h2{font-size:clamp(1.7rem,3.6vw,2.6rem);color:#fff;margin-bottom:.7em;line-height:1.45}
@@ -376,8 +380,8 @@
     *{animation:none!important;transition:none!important}
     .reveal{opacity:1;transform:none}
     .fish-grid .fish-card{opacity:1;transform:none}
-    /* パララックスは前庭系の不調を誘発しうるため固定背景を通常スクロールに戻す */
-    .hero-bg,.quality-bg,.overseas .kanji{background-attachment:scroll}
+    /* パララックスは前庭系の不調を誘発しうるため無効化（JS側も reduce を検知して停止）*/
+    .hero-bg::before,.quality-bg,.overseas .kanji{transform:none!important}
   }
 
   /* ===== 言語切替（他のCSSに負けないよう最後に高い優先度で定義） ===== */
@@ -413,7 +417,7 @@
 </nav>
 
 <!-- HERO -->
-<section class="hero" id="top">
+<section class="hero" id="top" data-parallax>
   <div class="hero-bg" aria-hidden="true"></div>
   <div class="wrap">
     <span class="eyebrow" data-ja>埼玉県坂戸市 ｜ 金魚専門養魚場</span>
@@ -482,7 +486,7 @@
 </section>
 
 <!-- QUALITY -->
-<section class="quality" id="quality">
+<section class="quality" id="quality" data-parallax>
   <div class="quality-bg" aria-hidden="true"></div>
   <div class="wrap reveal">
     <div class="head">
@@ -537,7 +541,7 @@
 </section>
 
 <!-- OVERSEAS -->
-<section class="overseas reveal" id="overseas">
+<section class="overseas reveal" id="overseas" data-parallax>
   <span class="kanji" aria-hidden="true"></span>
   <div class="wrap">
     <span class="eyebrow" data-ja>For Overseas Customers</span>
@@ -720,6 +724,28 @@
     })
   },{threshold:.6});
   document.querySelectorAll('[data-count]').forEach(el=>countIO.observe(el));
+
+  // 背景パララックス（iOS でも効くよう transform で制御。多少のカクつきは許容）。
+  // data-parallax の各セクションで、その背景層(--py)を -rect.top ぶん動かし、
+  // 背景を viewport に固定して見せる。前面の内容だけがスクロールする。
+  const pxReduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(!pxReduce){
+    const pxSecs=[...document.querySelectorAll('[data-parallax]')];
+    let pxTick=false;
+    const pxUpdate=()=>{
+      pxTick=false;
+      const vh=window.innerHeight;
+      for(const s of pxSecs){
+        const r=s.getBoundingClientRect();
+        if(r.bottom<-40||r.top>vh+40)continue;   // 画面外はスキップ（負荷軽減）
+        s.style.setProperty('--py',(-r.top).toFixed(1)+'px');
+      }
+    };
+    const pxOnScroll=()=>{if(!pxTick){pxTick=true;requestAnimationFrame(pxUpdate)}};
+    window.addEventListener('scroll',pxOnScroll,{passive:true});
+    window.addEventListener('resize',pxOnScroll,{passive:true});
+    pxUpdate();
+  }
 
   function demoNotice(ev){ev.preventDefault();
     alert(document.body.classList.contains('en')
