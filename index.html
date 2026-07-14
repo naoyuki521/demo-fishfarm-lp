@@ -43,6 +43,14 @@
   .wrap{max-width:1120px;margin:0 auto}
   .narrow{max-width:780px;margin:0 auto}
 
+  /* キーボード操作時のフォーカス可視化（入力欄以外のリンク・ボタンにも明示） */
+  a:focus-visible,button:focus-visible,.btn:focus-visible,.nav-cta:focus-visible{
+    outline:2px solid var(--gold-soft);outline-offset:2px;border-radius:4px;
+    box-shadow:0 0 0 4px rgba(29,50,38,.4);
+  }
+  /* 言語切替は親が overflow:hidden のためリングが切れないよう内側に描く */
+  .lang button:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #fff}
+
   /* lang toggle visibility → スタイル末尾で優先度を上げて定義 */
 
   .eyebrow{
@@ -114,9 +122,10 @@
   }
   .hero-bg .ph{width:100%;height:100%}
   .hero-bg::after{content:"";position:absolute;inset:0;
-    background:linear-gradient(180deg,rgba(20,34,26,.5) 0%,rgba(20,34,26,.2) 38%,rgba(20,34,26,.72) 100%)}
+    background:linear-gradient(180deg,rgba(20,34,26,.55) 0%,rgba(20,34,26,.28) 30%,rgba(20,34,26,.5) 64%,rgba(20,34,26,.82) 100%)}
   .hero .wrap{position:relative;z-index:2;width:100%}
-  .hero .eyebrow{color:var(--gold-soft)}.hero .eyebrow::before{background:var(--gold-soft)}
+  .hero .eyebrow{color:var(--gold-soft);text-shadow:0 1px 10px rgba(0,0,0,.65),0 0 3px rgba(0,0,0,.55)}
+  .hero .eyebrow::before{background:var(--gold-soft);opacity:.9}
   .hero h1{
     font-size:clamp(2.3rem,6.4vw,4.4rem);color:#fff;letter-spacing:.04em;
     line-height:1.32;margin-bottom:.55em;font-weight:700;text-shadow:0 2px 30px rgba(0,0,0,.35)}
@@ -410,7 +419,7 @@
 <!-- HERO -->
 <section class="hero" id="top">
   <div class="hero-bg">
-    <img src="hero-fishfarm.jpg" alt="水鉢を泳ぐ金魚" style="width:100%;height:100%;object-fit:cover;object-position:center 62%">
+    <img decoding="async" fetchpriority="high" width="1475" height="829" src="hero-fishfarm.jpg" alt="水鉢を泳ぐ金魚" style="width:100%;height:100%;object-fit:cover;object-position:center 62%">
   </div>
   <div class="wrap">
     <span class="eyebrow" data-ja>埼玉県坂戸市 ｜ 金魚専門養魚場</span>
@@ -431,7 +440,7 @@
 <section class="about reveal" id="about">
   <div class="wrap">
     <div class="about-visual">
-      <img src="farm-overview.jpg" alt="志村養魚場の全景" style="width:100%;height:100%;object-fit:cover">
+      <img loading="lazy" decoding="async" width="1672" height="941" src="farm-overview.jpg" alt="志村養魚場の全景" style="width:100%;height:100%;object-fit:cover">
     </div>
     <div class="about-text">
       <span class="eyebrow" data-ja>About</span>
@@ -453,7 +462,7 @@
 
 <!-- FISH -->
 <section class="fish" id="fish">
-  <span class="swimmer s1" aria-hidden="true"><img src="swim-goshiki.png" alt=""></span>
+  <span class="swimmer s1" aria-hidden="true"><img loading="lazy" decoding="async" width="1195" height="896" src="swim-goshiki.png" alt=""></span>
   <div class="wrap">
     <div class="head reveal">
       <span class="eyebrow" data-ja>Our Fish</span>
@@ -464,13 +473,13 @@
       <p data-en>Every fish differs in color and character. These are just a few examples — please ask us or check our SNS for current stock.</p>
     </div>
     <div class="fish-grid">
-      <div class="fish-card reveal"><div class="img"><img src="fish-goshiki.jpg" alt="五色・キャリコ系の金魚" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="fish-card reveal"><div class="img"><img loading="lazy" decoding="async" width="1195" height="896" src="fish-goshiki.jpg" alt="五色・キャリコ系の金魚" style="width:100%;height:100%;object-fit:cover"></div>
         <div class="cap"><h3 data-ja>五色・キャリコ系</h3><h3 data-en>Calico type</h3><span>five-color</span></div></div>
-      <div class="fish-card reveal"><div class="img"><img src="fish-sakura.jpg" alt="桜・透明鱗系の金魚" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="fish-card reveal"><div class="img"><img loading="lazy" decoding="async" width="1448" height="1086" src="fish-sakura.jpg" alt="桜・透明鱗系の金魚" style="width:100%;height:100%;object-fit:cover"></div>
         <div class="cap"><h3 data-ja>桜・透明鱗系</h3><h3 data-en>Sakura type</h3><span>translucent scale</span></div></div>
-      <div class="fish-card reveal"><div class="img"><img src="fish-edojikin.jpg" alt="更紗・墨柄の金魚" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="fish-card reveal"><div class="img"><img loading="lazy" decoding="async" width="1448" height="1086" src="fish-edojikin.jpg" alt="更紗・墨柄の金魚" style="width:100%;height:100%;object-fit:cover"></div>
         <div class="cap"><h3 data-ja>更紗・墨柄系</h3><h3 data-en>Sarasa type</h3><span>orange &amp; sumi</span></div></div>
-      <div class="fish-card reveal"><div class="img"><img src="fish-silk.jpg" alt="白・シルク系の金魚" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="fish-card reveal"><div class="img"><img loading="lazy" decoding="async" width="1448" height="1086" src="fish-silk.jpg" alt="白・シルク系の金魚" style="width:100%;height:100%;object-fit:cover"></div>
         <div class="cap"><h3 data-ja>白・シルク系</h3><h3 data-en>Silk white type</h3><span>soft white</span></div></div>
     </div>
     <p class="fish-note" data-ja>※ 品種名・分類は代表的な呼称です。詳細は個体ごとにご案内します。</p>
@@ -515,7 +524,7 @@
 <section class="event reveal" id="event">
   <div class="wrap">
     <div class="event-visual">
-      <img src="event-show.jpg" alt="品評会・即売会の様子" style="width:100%;height:100%;object-fit:cover">
+      <img loading="lazy" decoding="async" width="1536" height="1024" src="event-show.jpg" alt="品評会・即売会の様子" style="width:100%;height:100%;object-fit:cover">
     </div>
     <div class="event-text">
       <span class="eyebrow" data-ja>Events</span>
@@ -535,7 +544,7 @@
 
 <!-- OVERSEAS -->
 <section class="overseas reveal" id="overseas">
-  <span class="kanji" aria-hidden="true"><img src="fish-silhouette.png" alt=""></span>
+  <span class="kanji" aria-hidden="true"><img loading="lazy" decoding="async" width="919" height="773" src="fish-silhouette.png" alt=""></span>
   <div class="wrap">
     <span class="eyebrow" data-ja>For Overseas Customers</span>
     <span class="eyebrow" data-en>For Overseas Customers</span>
@@ -545,7 +554,7 @@
     <p data-ja>日本の金魚は、いま世界中で愛されています。志村養魚場では、海外のお客様・バイヤーの方からのお問い合わせを英語で承っています。発送や輸出の可否は魚種・仕向地によって個別のご相談となりますが、まずはお気軽にお声がけください。</p>
     <p data-en>Japanese goldfish are loved around the world. We welcome inquiries in English from overseas customers and buyers. Shipping and export arrangements are handled case by case depending on the fish and destination — please feel free to reach out first.</p>
     <a href="#contact" class="btn btn-primary"><span data-ja>英語でお問い合わせ →</span><span data-en>Contact us in English →</span></a>
-    <span class="swimmer s2" aria-hidden="true"><img src="swim-pair.png" alt=""></span>
+    <span class="swimmer s2" aria-hidden="true"><img loading="lazy" decoding="async" width="1264" height="841" src="swim-pair.png" alt=""></span>
   </div>
 </section>
 
@@ -566,10 +575,10 @@
       <div><div class="n">TV</div><div class="l" data-ja>メディア出演</div><div class="l" data-en>media features</div></div>
     </div>
     <div class="media-grid">
-      <div class="sq"><img src="fish-goshiki.jpg" alt="金魚" style="width:100%;height:100%;object-fit:cover"></div>
-      <div class="sq"><img src="event-show.jpg" alt="即売会" style="width:100%;height:100%;object-fit:cover"></div>
-      <div class="sq"><img src="fish-sakura.jpg" alt="金魚" style="width:100%;height:100%;object-fit:cover"></div>
-      <div class="sq"><img src="farm-overview.jpg" alt="養魚場" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="sq"><img loading="lazy" decoding="async" width="1195" height="896" src="fish-goshiki.jpg" alt="金魚" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="sq"><img loading="lazy" decoding="async" width="1536" height="1024" src="event-show.jpg" alt="即売会" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="sq"><img loading="lazy" decoding="async" width="1448" height="1086" src="fish-sakura.jpg" alt="金魚" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="sq"><img loading="lazy" decoding="async" width="1672" height="941" src="farm-overview.jpg" alt="養魚場" style="width:100%;height:100%;object-fit:cover"></div>
     </div>
     <div class="media-cta">
       <a href="#" class="btn btn-dark" onclick="return demoNotice(event)"><span data-ja>Instagramを見る</span><span data-en>View our Instagram</span></a>
