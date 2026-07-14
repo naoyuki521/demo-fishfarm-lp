@@ -57,10 +57,10 @@
     position:fixed;top:0;left:0;right:0;z-index:70;
     display:flex;align-items:center;justify-content:space-between;
     padding:15px clamp(18px,4vw,40px);
-    transition:background .4s,padding .4s,box-shadow .4s;
+    transition:background .4s,box-shadow .4s;  /* paddingは即時変化：メニュー位置がズレないように */
   }
   header.solid{background:rgba(244,241,232,.92);backdrop-filter:blur(10px);box-shadow:0 1px 0 var(--line);padding-top:11px;padding-bottom:11px}
-  .brand{display:flex;align-items:baseline;gap:.55em;color:var(--moss-deep);text-decoration:none}
+  .brand{display:flex;align-items:baseline;gap:.55em;color:var(--moss-deep);text-decoration:none;transition:color .4s ease}
   header.on-hero .brand{color:var(--paper)}
   .brand .logo{font-family:"Shippori Mincho",serif;font-weight:800;font-size:1.4rem;letter-spacing:.12em}
   .brand .sub{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:.82rem;letter-spacing:.14em;opacity:.8}
@@ -84,7 +84,7 @@
 
   /* ---------- jump nav ---------- */
   .jump{
-    position:fixed;top:64px;left:0;right:0;z-index:60;
+    position:fixed;top:64px;left:0;right:0;z-index:60;  /* topはJSでヘッダー実測値に合わせる */
     background:rgba(29,50,38,.96);backdrop-filter:blur(8px);
     transform:translateY(-120%);transition:transform .45s cubic-bezier(.2,.7,.2,1);
     box-shadow:0 10px 30px -18px rgba(0,0,0,.6);
@@ -189,10 +189,10 @@
   .quality{
     color:var(--paper);position:relative;overflow:hidden;
   }
-  /* 背景画像（JSでゆっくり動かしてパララックスにする。iOS Safariは
+  /* 背景画像（JSで画面に固定して見えるよう制御。iOS Safariは
      background-attachment:fixed を無視するため、この方式で統一） */
   .quality-bg{
-    position:absolute;left:0;right:0;top:-14%;height:128%;z-index:0;
+    position:absolute;left:0;right:0;top:0;height:100vh;z-index:0;
     background-image:url('quality-bg.jpg');
     background-size:cover;
     background-position:72% 28%;   /* 金魚が写っている右上寄りを見せる */
@@ -474,9 +474,9 @@
 </section>
 
 <!-- QUALITY -->
-<section class="quality reveal" id="quality">
+<section class="quality" id="quality">
   <div class="quality-bg" aria-hidden="true"></div>
-  <div class="wrap">
+  <div class="wrap reveal">
     <div class="head">
       <span class="eyebrow" data-ja>Our Craft</span>
       <span class="eyebrow" data-en>Our Craft</span>
@@ -670,13 +670,18 @@
   const head=document.getElementById('head');
   const jump=document.getElementById('jump');
   const hero=document.getElementById('top');
+  // ジャンプメニューはヘッダーの実際の高さの真下に置く（端末差で被らないように）
+  const placeJump=()=>{ jump.style.top=Math.round(head.getBoundingClientRect().height)+'px'; };
   const onScroll=()=>{
     const past=window.scrollY>hero.offsetHeight-90;
     head.classList.toggle('solid',window.scrollY>40);
     head.classList.toggle('on-hero',!past);
     jump.classList.toggle('show',past);
+    placeJump();
   };
-  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',()=>{placeJump();onScroll()},{passive:true});
+  onScroll();
 
   // reveal
   const io=new IntersectionObserver((es)=>{
@@ -690,21 +695,20 @@
   },{threshold:.15});
   document.querySelectorAll('.fish-grid').forEach(el=>gridIO.observe(el));
 
-  // こだわりセクションの背景パララックス
-  // （iOS Safari は background-attachment:fixed を無視するため、JSで制御して全端末で同じ挙動にする）
+  // こだわりセクションの背景を「画面に固定」して見せる
+  // （iOS Safari は background-attachment:fixed を無視するため、JSで全端末同じ挙動にする）
   const qSec=document.querySelector('.quality');
   const qBg=document.querySelector('.quality-bg');
   const reduceMotion=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   let qTicking=false;
   function qParallax(){
     qTicking=false;
-    if(!qSec||!qBg||reduceMotion)return;
+    if(!qSec||!qBg)return;
+    if(reduceMotion){qBg.style.transform='none';return}
     const r=qSec.getBoundingClientRect();
-    if(r.bottom<0||r.top>window.innerHeight)return;
-    // セクションが画面に入ってから出るまでを 0→1 に正規化
-    const p=(window.innerHeight-r.top)/(window.innerHeight+r.height);
-    // 背景を上下に±5%だけゆっくり動かす（手前が流れて見える）
-    qBg.style.transform='translate3d(0,'+((p-0.5)*-10).toFixed(2)+'%,0)';
+    if(r.bottom<-100||r.top>window.innerHeight+100)return;
+    // セクションの上端ぶんだけ逆に動かす＝背景は常に画面の上端に居座る（＝固定に見える）
+    qBg.style.transform='translate3d(0,'+(-r.top).toFixed(1)+'px,0)';
   }
   window.addEventListener('scroll',()=>{
     if(!qTicking){requestAnimationFrame(qParallax);qTicking=true}
